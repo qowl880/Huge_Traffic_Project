@@ -21,4 +21,6 @@ spring:
         - id: user-service
           uri: lb://USER-SERVICE
           predicates:
-            -
+            - Path=/api/v1/users/**
+          filters:
+            - name: JwtAuthenticationFilter
