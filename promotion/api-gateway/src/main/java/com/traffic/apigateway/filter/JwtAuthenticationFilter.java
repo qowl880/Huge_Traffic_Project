@@ -3,9 +3,17 @@ package com.traffic.apigateway.filter;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactorLoadBalancerExchangeFilterFunction;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
+import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.server.ServerWebExchange;
+import reactor.core.publisher.Mono;
 
+import java.util.Map;
+
+@Component
 public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAuthenticationFilter.Config> {
 
     @LoadBalanced
@@ -35,7 +43,27 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
         };
     }
 
-    public static class Config{
+    private Mono<Void> handleAuthenticationError(ServerWebExchange exchange, Throwable e) {
+        exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
+        return exchange.getResponse().setComplete();
+    }
+
+    private Mono<Long> validateToken(String token) {
+        return webClient.post()
+                .uri("/auth/validate")
+                .bodyValue("{\"token\":\"" + token + "\"}")
+                .header("Content-Type", "application/json")
+                .retrieve()
+                .bodyToMono(Map.class)
+                .map(response -> Long.valueOf(response.get("id").toString()) );
+    }
+
+    private Mono<Void> proceedWithUserId(Long userId, ServerWebExchange exchange, GatewayFilterChain chain) {
+        exchange.getRequest().mutate().header("X-USER-ID", String.valueOf(userId));
+        return chain.filter(exchange);
+    }
+
+    public static class Config {
         // 필터 구성을 위한 설정 클래스
     }
 }
