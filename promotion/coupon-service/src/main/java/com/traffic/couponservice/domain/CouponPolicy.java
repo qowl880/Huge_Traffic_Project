@@ -30,7 +30,7 @@ public class CouponPolicy {
     private DiscountType discountType;      // 쿠폰 타입
 
     @Column(nullable = false)
-    private Integer disCountValue;          // 얼마나 할인이 들어가는지
+    private Integer discountValue;          // 얼마나 할인이 들어가는지
 
     @Column(nullable = false)
     private Integer minimumOrderAmount;   // 최소 주문 금액
@@ -51,7 +51,7 @@ public class CouponPolicy {
     private LocalDateTime createdAt;    // 쿠폰 생성 일자
 
     @Column(nullable = false)
-    private LocalDateTime updateTime;
+    private LocalDateTime updatedAt;
 
     public enum DiscountType{
         FIXED_AMOUNT,       // 정액 할인
@@ -61,12 +61,12 @@ public class CouponPolicy {
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
-        updateTime = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
     }
 
     @PreUpdate
     protected void onUpdate() {
-        updateTime = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
     }
 
 }
