@@ -58,4 +58,39 @@ public class CouponPolicyDto {
                     .build();
         }
     }
+
+    @Getter
+    @Builder
+    public static class Response {
+        private Long id;
+        private String name;
+        private String description;
+        private CouponPolicy.DiscountType discountType;
+        private Integer discountValue;
+        private Integer minimumOrderAmount;
+        private Integer maximumDiscountAmount;
+        private Integer totalQuantity;
+        private Integer issuedQuantity;
+        private LocalDateTime startTime;
+        private LocalDateTime endTime;
+        private LocalDateTime createdAt;
+        private LocalDateTime updatedAt;
+
+        public static Response from(CouponPolicy couponPolicy) {
+            return Response.builder()
+                    .id(couponPolicy.getId())
+                    .name(couponPolicy.getName())
+                    .description(couponPolicy.getDescription())
+                    .discountType(couponPolicy.getDiscountType())
+                    .discountValue(couponPolicy.getDiscountValue())
+                    .minimumOrderAmount(couponPolicy.getMinimumOrderAmount())
+                    .maximumDiscountAmount(couponPolicy.getMaximumDiscountAmount())
+                    .totalQuantity(couponPolicy.getTotalQuantity())
+                    .startTime(couponPolicy.getStartTime())
+                    .endTime(couponPolicy.getEndTime())
+                    .createdAt(couponPolicy.getCreatedAt())
+                    .updatedAt(couponPolicy.getUpdatedAt())
+                    .build();
+        }
+    }
 }
