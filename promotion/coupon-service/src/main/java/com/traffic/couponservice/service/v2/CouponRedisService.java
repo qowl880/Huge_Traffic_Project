@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RAtomicLong;
 import org.redisson.api.RLock;
+import org.redisson.api.RSet;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +28,7 @@ public class CouponRedisService {
 
     private static final String COUPON_QUANTITY_KEY = "coupon:quantity:";
     private static final String COUPON_LOCK_KEY = "coupon:lock:";
+    private static final String COUPON_USER_ID = "coupon:userId:";
     private static final long LOCK_WAIT_TIME = 3;       // Lock 대기 시간 제한
     private static final long LOCK_LEASE_TIME = 5;      // 자동 만료 시간
 
@@ -37,6 +39,13 @@ public class CouponRedisService {
         RLock lock = redissonClient.getLock(lockKey);
 
         try {
+            // 이미 발급받은 유저인지 확인
+            Long userId = UserIdInterceptor.getCurrentUserId();     // InterCepter를 통한 현재 Header에 저장되어 있는 UserId값 추출
+            RSet<Long> userIdSet = redissonClient.getSet(COUPON_USER_ID+userId);
+            if(userIdSet.contains(userId)){
+                throw new CouponIssueException("이미 발급받은 쿠폰입니다. 더 이상 발급이 불가능 합니다");
+            }
+
             // Redis에서 Lock 시간 설정
             // 여기서 락을 걸어주는 이유는 동시에 2명의 유저가 접속했을때 해당 쿠폰 정책을 동시에 읽게 되면 decrementAndGet 기능이
             // 동시에 발생하게 되어 -2가 생길 수도 있음 따라서, 쿠폰 정책데이터에 Lock 지정하여 다른 유저가 접근 못하게 막음
@@ -64,10 +73,13 @@ public class CouponRedisService {
                 throw new CouponIssueException("쿠폰이 모두 소진되었습니다.");
             }
 
+            //  중복 유저 발급을 방지하기 위한 Redis Set에 UserId 저장
+            userIdSet.add(userId);
+
             // 쿠폰 발급
             return couponRepository.save(Coupon.builder()
                     .couponPolicy(couponPolicy)
-                    .userId(UserIdInterceptor.getCurrentUserId())
+                    .userId(userId)
                     .couponCode(generateCouponCode())
                     .build());
             }catch (InterruptedException e){
@@ -81,5 +93,9 @@ public class CouponRedisService {
                 if(lock.isHeldByCurrentThread())        // 현재 스레드가 락을 보유하지 않았을 때 unlock() 호출 시 발생하는 IllegalMonitorStateException 방지
                     lock.unlock();      // 모든 작업이 끝났다면 Lock 해제
             }
+    }
+
+    private String generateCouponCode() {
+        return java.util.UUID.randomUUID().toString().substring(0, 8);
     }
 }
