@@ -1,4 +1,4 @@
-package com.traffic.couponservice.controller.v1;
+package com.traffic.couponservice.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
