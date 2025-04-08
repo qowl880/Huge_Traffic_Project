@@ -20,6 +20,8 @@ public interface CouponRepository extends JpaRepository<Coupon, Long> {
 
     Page<Coupon> findByUserIdAndStatusOrderByCreatedAtDesc(Long userId, Coupon.Status status, Pageable pageable);
 
+    // 비관적 락 - 잠금이 설정된 동안에는 현재 업무가 끝나기 전까지 다른 api가 들어와도 대기상대가 됨
+    // 여기에 Lock을 건 이유는 쿠폰을 발급 받는 도중 해당 쿠폰 정책이 변경이 되거나 할 수 있기 때문
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT c FROM Coupon c WHERE c.id = :id")
     Optional<Coupon> findByIdWithLock(@Param("id") Long id);
