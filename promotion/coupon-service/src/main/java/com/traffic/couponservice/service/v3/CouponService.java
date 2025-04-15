@@ -1,6 +1,7 @@
 package com.traffic.couponservice.service.v3;
 
 
+import com.traffic.couponservice.aop.CouponMetered;
 import com.traffic.couponservice.config.UserIdInterceptor;
 import com.traffic.couponservice.domain.Coupon;
 import com.traffic.couponservice.domain.CouponPolicy;
@@ -39,6 +40,7 @@ public class CouponService {
     private final CouponPolicyService couponPolicyService;
 
     @Transactional(readOnly = true)
+    @CouponMetered(version = "v3")
     public void requestCouponIssue(CouponDto.IssueRequest request){
         String quantityKey = COUPON_QUANTITY_KEY + request.getCouponPolicyId();
         String lockKey = COUPON_LOCK_KEY + request.getCouponPolicyId();

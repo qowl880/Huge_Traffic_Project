@@ -1,5 +1,6 @@
 package com.traffic.couponservice.service.v1;
 
+import com.traffic.couponservice.aop.CouponMetered;
 import com.traffic.couponservice.config.UserIdInterceptor;
 import com.traffic.couponservice.domain.Coupon;
 import com.traffic.couponservice.domain.CouponPolicy;
@@ -26,6 +27,7 @@ public class CouponService {
     private final CouponPolicyRepository couponPolicyRepository;
 
     @Transactional
+    @CouponMetered(version = "v1")
     public Coupon issueCoupon(CouponDto.IssueRequest request) {
 
         /**

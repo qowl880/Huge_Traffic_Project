@@ -1,5 +1,6 @@
 package com.traffic.couponservice.service.v2;
 
+import com.traffic.couponservice.aop.CouponMetered;
 import com.traffic.couponservice.config.UserIdInterceptor;
 import com.traffic.couponservice.domain.Coupon;
 import com.traffic.couponservice.domain.CouponPolicy;
@@ -33,6 +34,7 @@ public class CouponRedisService {
     private static final long LOCK_LEASE_TIME = 5;      // 자동 만료 시간
 
     @Transactional
+    @CouponMetered(version = "v2")
     public Coupon issueCoupon(CouponDto.IssueRequest request){
         String quantityKey = COUPON_QUANTITY_KEY + request.getCouponPolicyId();
         String lockKey = COUPON_LOCK_KEY + request.getCouponPolicyId();
