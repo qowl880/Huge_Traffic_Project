@@ -1,0 +1,28 @@
+global:
+  # 15초마다 데이터를 수집
+  scrape_interval: 15s
+  # 15초마다 규칙을 평가
+  evaluation_interval: 15s
+
+rule_files:
+  - "/etc/prometheus/rules/*.yml"
+
+# Prometheus가 모니터링할 타겟(서비스) 목록을 정의
+scrape_configs:
+  # 이 잡(job)의 이름입니다. 대시보드나 쿼리에서 구분할 때 사용됩니다.
+  - job_name: 'prometheus'
+    static_configs:
+      # Prometheus 서버 자신을 모니터링합니다.
+      - targets: ['localhost:9091']
+
+  - job_name: 'coupon-service'
+    # Spring Boot Actuator를 사용하는 서비스에서 주로 /actuator/prometheus 경로로 메트릭을 제공합니다.
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['docker.for.mac.localhost:8080']
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          # alertmanager:9093 # 추후 AlertManager 추가 시 주석 해제
