@@ -1,0 +1,28 @@
+package com.traffic.couponservice.repository;
+
+import com.traffic.couponservice.domain.Coupon;
+import jakarta.persistence.LockModeType;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import java.util.Optional;
+
+
+public interface CouponRepository extends JpaRepository<Coupon, Long> {
+    Optional<Coupon> findByIdAndUserId(Long id, Long userId);
+
+    @Query("SELECT COUNT(c) FROM Coupon c WHERE c.couponPolicy.id = :policyId")
+    Long countByCouponPolicyId(@Param("policyId") Long policyId);
+
+    Page<Coupon> findByUserIdAndStatusOrderByCreatedAtDesc(Long userId, Coupon.Status status, Pageable pageable);
+
+    // 비관적 락 - 잠금이 설정된 동안에는 현재 업무가 끝나기 전까지 다른 api가 들어와도 대기상대가 됨
+    // 여기에 Lock을 건 이유는 쿠폰을 발급 받는 도중 해당 쿠폰 정책이 변경이 되거나 할 수 있기 때문
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT c FROM Coupon c WHERE c.id = :id")
+    Optional<Coupon> findByIdWithLock(@Param("id") Long id);
+}
