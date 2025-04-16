@@ -1,5 +1,6 @@
 package com.traffic.couponservice.service.v2;
 
+import com.traffic.couponservice.aop.CouponMetered;
 import com.traffic.couponservice.config.UserIdInterceptor;
 import com.traffic.couponservice.domain.Coupon;
 import com.traffic.couponservice.domain.CouponPolicy;
@@ -33,18 +34,19 @@ public class CouponRedisService {
     private static final long LOCK_LEASE_TIME = 5;      // 자동 만료 시간
 
     @Transactional
+    @CouponMetered(version = "v2")
     public Coupon issueCoupon(CouponDto.IssueRequest request){
         String quantityKey = COUPON_QUANTITY_KEY + request.getCouponPolicyId();
         String lockKey = COUPON_LOCK_KEY + request.getCouponPolicyId();
         RLock lock = redissonClient.getLock(lockKey);
 
         try {
-            // 이미 발급받은 유저인지 확인
+//            // 이미 발급받은 유저인지 확인
             Long userId = UserIdInterceptor.getCurrentUserId();     // InterCepter를 통한 현재 Header에 저장되어 있는 UserId값 추출
-            RSet<Long> userIdSet = redissonClient.getSet(COUPON_USER_ID+userId);
-            if(userIdSet.contains(userId)){
-                throw new CouponIssueException("이미 발급받은 쿠폰입니다. 더 이상 발급이 불가능 합니다");
-            }
+//            RSet<Long> userIdSet = redissonClient.getSet(COUPON_USER_ID+userId);
+//            if(userIdSet.contains(userId)){
+//                throw new CouponIssueException("이미 발급받은 쿠폰입니다. 더 이상 발급이 불가능 합니다");
+//            }
 
             // Redis에서 Lock 시간 설정
             // 여기서 락을 걸어주는 이유는 동시에 2명의 유저가 접속했을때 해당 쿠폰 정책을 동시에 읽게 되면 decrementAndGet 기능이
@@ -73,8 +75,8 @@ public class CouponRedisService {
                 throw new CouponIssueException("쿠폰이 모두 소진되었습니다.");
             }
 
-            //  중복 유저 발급을 방지하기 위한 Redis Set에 UserId 저장
-            userIdSet.add(userId);
+//            //  중복 유저 발급을 방지하기 위한 Redis Set에 UserId 저장
+//            userIdSet.add(userId);
 
             // 쿠폰 발급
             return couponRepository.save(Coupon.builder()
