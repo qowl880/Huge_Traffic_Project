@@ -11,6 +11,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
+// 사용자의 Point 총 잔액 , 사용자와 1:1 관계
 @Entity
 @Table(name = "point_balances")
 @Getter
