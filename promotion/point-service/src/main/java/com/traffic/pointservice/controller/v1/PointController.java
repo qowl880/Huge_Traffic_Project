@@ -1,4 +1,4 @@
-package com.traffic.pointservice.controller;
+package com.traffic.pointservice.controller.v1;
 
 import com.traffic.pointservice.config.UserIdInterceptor;
 import com.traffic.pointservice.domain.Point;
