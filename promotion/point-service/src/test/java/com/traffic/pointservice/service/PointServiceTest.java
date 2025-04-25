@@ -5,6 +5,7 @@ import com.traffic.pointservice.domain.PointBalance;
 import com.traffic.pointservice.domain.PointType;
 import com.traffic.pointservice.repository.PointBalanceRepository;
 import com.traffic.pointservice.repository.PointRepository;
+import com.traffic.pointservice.service.v1.PointService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
