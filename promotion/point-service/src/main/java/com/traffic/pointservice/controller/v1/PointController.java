@@ -3,7 +3,7 @@ package com.traffic.pointservice.controller.v1;
 import com.traffic.pointservice.config.UserIdInterceptor;
 import com.traffic.pointservice.domain.Point;
 import com.traffic.pointservice.dto.PointDto;
-import com.traffic.pointservice.service.PointService;
+import com.traffic.pointservice.service.v1.PointService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -12,7 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@RestController
+@RestController("PointControllerV1")
 @RequestMapping("/api/v1/points")
 @RequiredArgsConstructor
 public class PointController {
