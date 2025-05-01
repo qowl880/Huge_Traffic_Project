@@ -53,6 +53,9 @@ public class PointRedisService {
                             .balance(0L)
                             .build());
 
+            pointBalance.addBalance(amount);
+            pointBalance = pointBalanceRepository.save(pointBalance);
+
             // 캐시 업데이트
             updateBalanceCache(userId, pointBalance.getBalance());
 
