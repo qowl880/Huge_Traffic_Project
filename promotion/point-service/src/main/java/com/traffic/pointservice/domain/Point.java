@@ -11,6 +11,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
+// 각각의 Point 정보(사용, 적립, 취소 등등)
 @Entity
 @Table(name = "points")
 @Getter
