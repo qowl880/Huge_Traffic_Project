@@ -1,4 +1,4 @@
-package com.traffic.pointservice.service;
+package com.traffic.pointservice.service.v1;
 
 import com.traffic.pointservice.domain.Point;
 import com.traffic.pointservice.domain.PointBalance;
