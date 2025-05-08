@@ -36,4 +36,11 @@ public class User {
     @Column(name = "updated_at", nullable = false, columnDefinition = "DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    public User KakaoToUser(KakaoUser kakaoUser){
+        this.name = kakaoUser.getUsername();
+        this.email = kakaoUser.getEmail();
+        this.password = kakaoUser.getPassword();
+        return this;
+    }
 }
