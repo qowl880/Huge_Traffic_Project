@@ -1,12 +1,16 @@
 package com.traffic.userservice.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.traffic.userservice.exception.DuplicateUserException;
 import com.traffic.userservice.exception.UnauthorizedAccessException;
 import com.traffic.userservice.exception.UserNotFoundException;
 import com.traffic.userservice.model.User;
 import com.traffic.userservice.model.UserLoginHistory;
 import com.traffic.userservice.model.dto.UserDto;
+import com.traffic.userservice.service.KakaoService;
 import com.traffic.userservice.service.UserService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +23,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
+    private final KakaoService kakaoService;
 
     @PostMapping("/signup")
     public ResponseEntity<?> createUser(
@@ -70,5 +75,17 @@ public class UserController {
     @ExceptionHandler(UnauthorizedAccessException.class)
     public ResponseEntity<String> handleUnauthorizedAccess(UnauthorizedAccessException exception) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(exception.getMessage());
+    }
+
+    @GetMapping("/kakao/callback")
+    public String kakaoLogin(@RequestParam String code, HttpServletResponse response) throws JsonProcessingException {
+        // JWT 반환
+        String token = kakaoService.kakaoLogin(code);
+
+        Cookie cookie = new Cookie("Authorization", token.substring(7));
+        cookie.setPath("/");
+        response.addCookie(cookie);
+
+        return "redirect:/";
     }
 }
