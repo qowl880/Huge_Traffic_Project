@@ -45,7 +45,17 @@ public class PointRedisService {
                 throw new IllegalStateException("Point 관련 Lock 획득에 실패했습니다.");
             }
 
-
+            // 여기서만 Redis데이터를 사용한다면 필요없는 과정이지만 SpringBatch를 통해 서버 동작시 Redis에 모든 유저의 데이터를
+            // 저장 시키는 방식을 사용하기에 필요
+            // 캐시된 잔액 조회
+            Long currentBalance = getBalanceFromCache(userId);
+            if (currentBalance == null) {
+                // 캐시된 잔액이 없으면 DB에서 조회
+                currentBalance = getBalanceFromDB(userId);
+                // 캐시 업데이트
+                updateBalanceCache(userId, currentBalance);
+            }
+            
             // 포인트 잔액 증가
             PointBalance pointBalance = pointBalanceRepository.findByUserId(userId)
                     .orElseGet(() -> PointBalance.builder()
