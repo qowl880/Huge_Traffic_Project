@@ -1,9 +1,9 @@
-package com.traffic.pointservice.controller.v1;
+package com.traffic.pointservice.controller.v2;
 
 import com.traffic.pointservice.config.UserIdInterceptor;
 import com.traffic.pointservice.domain.Point;
 import com.traffic.pointservice.dto.PointDto;
-import com.traffic.pointservice.service.v1.PointService;
+import com.traffic.pointservice.service.v2.PointRedisService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -12,17 +12,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@RestController("PointControllerV1")
-@RequestMapping("/api/v1/points")
+@RestController("PointControllerV2")
+@RequestMapping("/api/v2/points")
 @RequiredArgsConstructor
 public class PointController {
-    private final PointService pointService;
+    private final PointRedisService pointRedisService;
+    private final com.traffic.pointservice.controller.v1.PointController pointControllerV1;
 
     @PostMapping("/earn")
     public ResponseEntity<PointDto.Response> earnPoints(@Valid @RequestBody PointDto.EarnRequest request) {
         Long userId = UserIdInterceptor.getCurrentUserId();
-        Point point = pointService.earnPoints(userId, request.getAmount(), request.getDescription());
-
+        Point point = pointRedisService.earnPoints(userId, request.getAmount(), request.getDescription());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(PointDto.Response.from(point));
     }
@@ -30,7 +30,7 @@ public class PointController {
     @PostMapping("/use")
     public ResponseEntity<PointDto.Response> usePoints(@Valid @RequestBody PointDto.UseRequest request) {
         Long userId = UserIdInterceptor.getCurrentUserId();
-        Point point = pointService.usePoints(userId, request.getAmount(), request.getDescription());
+        Point point = pointRedisService.usePoints(userId, request.getAmount(), request.getDescription());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(PointDto.Response.from(point));
     }
@@ -39,13 +39,13 @@ public class PointController {
     public ResponseEntity<PointDto.Response> cancelPoints(
             @PathVariable Long pointId,
             @Valid @RequestBody PointDto.CancelRequest request) {
-        Point point = pointService.cancelPoints(pointId, request.getDescription());
+        Point point = pointRedisService.cancelPoints(pointId, request.getDescription());
         return ResponseEntity.ok(PointDto.Response.from(point));
     }
 
     @GetMapping("/users/{userId}/balance")
     public ResponseEntity<PointDto.BalanceResponse> getBalance(@PathVariable Long userId) {
-        Long balance = pointService.getBalance(userId);
+        Long balance = pointRedisService.getBalance(userId);
         return ResponseEntity.ok(PointDto.BalanceResponse.of(userId, balance));
     }
 
@@ -53,8 +53,7 @@ public class PointController {
     public ResponseEntity<Page<PointDto.Response>> getPointHistory(
             @PathVariable Long userId,
             Pageable pageable) {
-        Page<Point> points = pointService.getPointHistory(userId, pageable);
-        Page<PointDto.Response> responses = points.map(PointDto.Response::from);
-        return ResponseEntity.ok(responses);
+        // v1 컨트롤러로 위임
+        return pointControllerV1.getPointHistory(userId, pageable);
     }
 }
